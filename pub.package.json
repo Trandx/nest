@@ -1,0 +1,29 @@
+{   
+    "name": "@nest/broker",
+    "private": false,
+    "version": "0.0.0",
+    "description": "",
+    "main": "./libs/index.js",
+    "types": "./types/index.d.ts",
+    "scripts": {
+    },
+    "keywords": [],
+    "packageManager": "pnpm@10.5.1",
+    "peerDependencies": {
+        "@nestjs/core": "^10.0.0"
+    },
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.com"
+    },
+    "author": {
+        "name": "Trandx",
+        "email": "trandxcode@gmail.com",
+        "url": "https://github.com/Trandx"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Trandx/tailwind-config"
+    },
+    "license": "MIT"
+}
