@@ -11,5 +11,7 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
+    "@app/worker/(.*)": "<rootDir>/../libs/worker/src/$1",
+    "@app/worker": "<rootDir>/../libs/worker/src"
   }
 }

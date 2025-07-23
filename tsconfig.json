@@ -13,7 +13,7 @@
     "baseUrl": "./",
     "paths": {
       "@/*": [
-        "src/*",
+        "src/*"
       ],
       "@app/utils/*": [
         "libs/utils/*"
@@ -47,21 +47,33 @@
       ],
       "@app/minio/*": [
         "libs/minio/src/*"
+      ],
+      "@app/worker": [
+        "libs/worker/src"
+      ],
+      "@app/worker/*": [
+        "libs/worker/src/*"
       ]
     },
     "incremental": true,
     "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
+    "strict": false, // Active toutes les vérifications strictes
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
     "typeRoots": [
       "./node_modules/@types",
       "src/common/@types"
     ]
   },
   "include": [
-    "libs/utils/load-env.utils.ts"
+    "src/**/*",
+    "libs/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
   ]
 }

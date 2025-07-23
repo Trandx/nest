@@ -64,6 +64,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/minio/tsconfig.lib.json"
       }
+    },
+    "worker": {
+      "type": "library",
+      "root": "libs/worker",
+      "entryFile": "index",
+      "sourceRoot": "libs/worker/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/worker/tsconfig.lib.json"
+      }
     }
   }
 }

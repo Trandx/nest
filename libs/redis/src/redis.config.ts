@@ -8,13 +8,13 @@ export class RedisConfig {
     poolConfig = (): Options =>{
       
       return {
-          max: +process.env.REDIS_MAX_CONNECTION || 10, // Maximum number of connections
-          min: +process.env.REDIS_MIN_CONNECTION || 0,  // Minimum number of connections
-          idleTimeoutMillis: +process.env.REDIS_IDLE_TIMEOUT || 5000, // Close connections idle for 5 seconds
+          max: +(process.env.REDIS_MAX_CONNECTION ?? 10), // Maximum number of connections
+          min: +(process.env.REDIS_MIN_CONNECTION ?? 0),  // Minimum number of connections
+          idleTimeoutMillis: +(process.env.REDIS_IDLE_TIMEOUT ?? 5000), // Close connections idle for 5 seconds
           //idleTimeoutMillis: 10000,
           // acquireTimeoutMillis: 5000, // Wait up to 5 seconds for a connection to become available
           // testOnBorrow: true, // Validate connection before use
-          evictionRunIntervalMillis: +process.env.REDIS_EVICTION_RUN_INTERVAL || 15000, // Check idle connections every 15 seconds
+          evictionRunIntervalMillis: +(process.env.REDIS_EVICTION_RUN_INTERVAL ?? 15000), // Check idle connections every 15 seconds
       }
     }
 

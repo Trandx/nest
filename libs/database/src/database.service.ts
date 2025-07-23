@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, DeepPartial, EntityTarget, FindOptionsWhere, QueryRunner } from 'typeorm';
+import { DataSource, DeepPartial, EntityTarget, FindOptionsWhere, ObjectLiteral, QueryRunner } from 'typeorm';
 
 export type UpSertType<T> = {
   entityClass: EntityTarget<T>, 
@@ -30,11 +30,11 @@ export class DatabaseService {
     await this.queryRunner.release();
   }
 
-  async useRepository<T>(entity: EntityTarget<T>){
+  async useRepository<T extends ObjectLiteral>(entity: EntityTarget<T>){
     return this.queryRunner.manager.getRepository<T>(entity);
   }
 
-  async upsert<T>({ entityClass, data, condition }: UpSertType<T>, schema: string = 'PUBLIC') {
+  async upsert<T extends ObjectLiteral>({ entityClass, data, condition }: UpSertType<T>, schema: string = 'PUBLIC') {
     try {
 
       if (schema.toUpperCase() !== 'PUBLIC' ) {
@@ -43,7 +43,7 @@ export class DatabaseService {
 
       const entityRepository = await this.useRepository(entityClass);
 
-      const existingAccount: T = await entityRepository.findOne({
+      const existingAccount = await entityRepository.findOne({
         where: condition
       });
   
@@ -66,12 +66,12 @@ export class DatabaseService {
     }
   };
 
-  async update<T>({ entityClass, data, condition }: UpSertType<T>){
+  async update<T extends ObjectLiteral>({ entityClass, data, condition }: UpSertType<T>){
     const entityRepository = await this.useRepository(entityClass);
 
     //return await entityRepository.update([condition as any], data as any) as any
 
-    const existingEntity: T = await entityRepository.findOne({
+    const existingEntity = await entityRepository.findOne({
       where: condition
     });
 

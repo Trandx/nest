@@ -4,6 +4,7 @@
     "declaration": true,
     "outDir": "../dist/libs",
     "declarationDir": "../dist/types",
+    "composite": true
   },
   "include": ["./**/*"],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
