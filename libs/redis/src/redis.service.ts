@@ -6,7 +6,7 @@ import { Pool } from 'libs/utils';
 export class RedisService implements OnModuleDestroy {
   constructor(private readonly poolService: Pool<Redis>) {}
 
-  async set(key: string, value: string, expireInSeconds?:  number | string): Promise<void> {
+  async set(key: string, value: string, expireInSeconds?:  number | string): Promise<boolean> {
     const client = await this.poolService.getClient();
     try {
       if (expireInSeconds) {
@@ -14,6 +14,9 @@ export class RedisService implements OnModuleDestroy {
       } else {
         await client.set(key, value);
       }
+      return true
+    } catch (error) {
+      throw error;
     } finally {
       this.poolService.releaseClient(client);
     }
@@ -23,6 +26,8 @@ export class RedisService implements OnModuleDestroy {
     const client = await this.poolService.getClient();
     try {
       return await client.get(key);
+    } catch (error) {
+      throw error;
     } finally {
       this.poolService.releaseClient(client);
     }
@@ -35,6 +40,8 @@ export class RedisService implements OnModuleDestroy {
         args = [args]
       }
       return await client.del(args);
+    } catch (error) {
+      throw error;
     } finally {
      this.poolService.releaseClient(client);
     }
@@ -44,6 +51,18 @@ export class RedisService implements OnModuleDestroy {
     const client = await this.poolService.getClient();
     try {
       return await client.exists(key);
+    } catch (error) {
+      throw error;
+    } finally {
+      this.poolService.releaseClient(client);
+    }
+  }
+  async ttl(key: string): Promise<number> {
+    const client = await this.poolService.getClient();
+    try {
+      return await client.ttl(key);
+    } catch (error) {
+      throw error;
     } finally {
       this.poolService.releaseClient(client);
     }

@@ -4,9 +4,9 @@
  * @param type 'numeric' | 'alphanumeric'. Default alphanumeric
  * @returns alpha-numeric value
  */
-type OTPType = 'numeric' | 'alphanumeric';
+type UidType = 'numeric' | 'alphanumeric';
 
-const uid = (length = 11, type: OTPType = 'alphanumeric') => {
+const uid = (length = 11, type: UidType = 'alphanumeric') => {
   let otp = '';
   if (type == 'numeric') {
     for (let i = 0; i < length; i++) {
