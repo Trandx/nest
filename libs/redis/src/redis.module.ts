@@ -2,12 +2,12 @@ import { DynamicModule, Global, Module } from '@nestjs/common';
 import { RedisService } from './redis.service';
 import { RedisConfig } from './redis.config';
 import Redis, { RedisOptions } from 'ioredis';
-import { Pool } from 'libs/utils';
+import { ConfigOptions, Pool } from 'libs/utils';
 
 @Global()
 @Module({})
 export class RedisModule {
-  static register( config:  RedisOptions ): DynamicModule {
+  static register( config:  ConfigOptions<RedisOptions> ): DynamicModule {
 
     return {
       module: RedisModule,

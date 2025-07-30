@@ -3,8 +3,6 @@ import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { WorkerService } from './worker.service';
 import { WorkerProcessor } from './worker.processor';
-import { REQUEST_CONTEXT_ID } from '@nestjs/core/router/request/request-constants';
-import { ContextIdFactory } from '@nestjs/core';
 
 @Global()
 @Module({})

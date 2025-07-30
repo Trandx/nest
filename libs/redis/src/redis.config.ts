@@ -1,26 +1,31 @@
+import { ConfigOptions } from "@app/utils/pool";
 import { Options } from "generic-pool";
 import Redis, { RedisOptions } from "ioredis";
 
 export class RedisConfig {
-    constructor (private readonly config: RedisOptions) {}
 
+    constructor (private readonly config: ConfigOptions<RedisOptions>) {}
     
-    poolConfig = (): Options =>{
+    private initPoolConfig(options?: Options): Options {
       
-      return {
-          max: +(process.env.REDIS_MAX_CONNECTION ?? 10), // Maximum number of connections
-          min: +(process.env.REDIS_MIN_CONNECTION ?? 0),  // Minimum number of connections
-          idleTimeoutMillis: +(process.env.REDIS_IDLE_TIMEOUT ?? 5000), // Close connections idle for 5 seconds
+      return options || {
+          max:  10, // Maximum number of connections
+          min:  0,  // Minimum number of connections
+          idleTimeoutMillis:  5000, // Close connections idle for 5 seconds
           //idleTimeoutMillis: 10000,
           // acquireTimeoutMillis: 5000, // Wait up to 5 seconds for a connection to become available
           // testOnBorrow: true, // Validate connection before use
-          evictionRunIntervalMillis: +(process.env.REDIS_EVICTION_RUN_INTERVAL ?? 15000), // Check idle connections every 15 seconds
+          evictionRunIntervalMillis:  15000, // Check idle connections every 15 seconds
       }
+    }
+
+    poolConfig = () => {
+      return this.initPoolConfig(this.config.pool);
     }
 
     async connect () {
         try {
-            const connection = new Redis(this.config)
+            const connection = new Redis(this.config.connection)
             
             connection.on('connect', () => {
                 console.log('Connected to Redis');

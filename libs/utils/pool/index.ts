@@ -2,6 +2,8 @@
 import { Injectable } from "@nestjs/common";
 import { createPool, Factory, Pool as GenericPool, Options,  } from "generic-pool";
 
+export type ConfigOptions<T> = { connection: T, pool: Options };
+
 interface PoolOptions {
   connect(): Promise<any>
   close(connection: any): Promise<any>

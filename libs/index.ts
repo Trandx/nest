@@ -11,3 +11,5 @@ export * from './mailer/src'
 export * from './minio/src'
 
 export * from './redis/src'
+
+export * from './worker/src'

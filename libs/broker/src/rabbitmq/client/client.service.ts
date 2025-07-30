@@ -43,26 +43,6 @@ export class ClientRMQService {
     }
   }
 
-  send({ to, message,  timeout = 15000 }: SendType): ExecPromise {
-    const promise: any = new Promise((resolve, reject) => {
-      
-      // setTimeout(() => {
-      //   resolve({
-      //     success: false,
-      //     error_type: 'timout',
-      //     message:
-      //     'RMQ response timeout: Data has been sent, but the remote server did not respond.'
-      //   });
-      // }, timeout );
-
-      this.sendInternal({ to, message, timeout })
-        .then(data => resolve(data))
-        .catch(error => reject(error))
-    })
-
-    return promise;
-  }
-
   private async sendInternal({ to: queueName = 'rpc_queue', message, timeout }: SendType): Promise<any> {
     const connection = await this.poolService.getClient();
     const channel = await connection.createChannel();
@@ -131,4 +111,26 @@ export class ClientRMQService {
       throw err;
     }
   }
+
+  send({ to, message,  timeout = 15000 }: SendType): ExecPromise {
+    const promise: any = new Promise((resolve, reject) => {
+      
+      // setTimeout(() => {
+      //   resolve({
+      //     success: false,
+      //     error_type: 'timout',
+      //     message:
+      //     'RMQ response timeout: Data has been sent, but the remote server did not respond.'
+      //   });
+      // }, timeout );
+
+      this.sendInternal({ to, message, timeout })
+        .then(data => resolve(data))
+        .catch(error => reject(error))
+    })
+
+    return promise;
+  }
+
+  
 }

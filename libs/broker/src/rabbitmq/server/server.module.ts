@@ -2,14 +2,14 @@ import { DynamicModule, Global, Module } from "@nestjs/common";
 import { ServerRMQService } from "./server.service";
 import { MessageHandlerService } from "./message-handler.service"
 import { RabbitmqConfig } from "../rabbitmq.config";
-import { Pool } from "libs/utils";
+import { ConfigOptions, Pool } from "libs/utils";
 import { Options } from 'amqplib'
 import { DiscoveryModule } from "@nestjs/core";
 
 @Global()
 @Module({})
   export class ServerRMQModule {
-    static register(serverQueueName: string, rmqConfig: Options.Connect): DynamicModule {
+    static register(serverQueueName: string, rmqConfig: ConfigOptions<Options.Connect>): DynamicModule {
         
       return {
         module: ServerRMQModule,
