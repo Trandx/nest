@@ -11,8 +11,8 @@ export const validatePasswordFormat = (password: string | null): string | null =
     if (!/\d/.test(password)) {
       return "Password must include at least one number.";
     }
-    if (!/[@$!%*?&]/.test(password)) {
-      return "Password must include at least one special character (@$!%*?&).";
+    if (!/[@$!%*?&.]/.test(password)) {
+      return "Password must include at least one special character (@$!%*?&.).";
     }
     return null; // Valid password
   };

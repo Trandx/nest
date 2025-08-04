@@ -6,6 +6,11 @@ import { Pool } from 'libs/utils';
 export class RedisService implements OnModuleDestroy {
   constructor(private readonly poolService: Pool<Redis>) {}
 
+  async getClient(): Promise<Redis> {
+    const client = await this.poolService.getClient();
+    return client;
+  }
+
   async set(key: string, value: string, expireInSeconds?:  number | string): Promise<boolean> {
     const client = await this.poolService.getClient();
     try {

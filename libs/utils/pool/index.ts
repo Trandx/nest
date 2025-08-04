@@ -67,4 +67,7 @@ export class Pool<T> {
       //process.exit(1);
     }
   }
+  async getPoolSize() {
+    return this.pool.size;
+  }
 }

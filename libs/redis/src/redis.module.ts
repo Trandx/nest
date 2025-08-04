@@ -16,7 +16,7 @@ export class RedisModule {
           provide: Pool,
           useFactory: () => {
             const redisConfig = new RedisConfig(config)
-            return new Pool<Redis>(redisConfig); // Instantiate Pool with RabbitmqConfig instance
+            return new Pool<Redis>(redisConfig); // Instantiate Pool with RedisConfig instance
             // const options = redisConfig.getPoolOptions();
           },
         },
