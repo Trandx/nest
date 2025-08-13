@@ -13,3 +13,5 @@ export * from './minio/src'
 export * from './redis/src'
 
 export * from './worker/src'
+
+export * from './key-generator/src'

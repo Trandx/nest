@@ -37,6 +37,17 @@ export class RedisService implements OnModuleDestroy {
       this.poolService.releaseClient(client);
     }
   }
+  async getJson<T>(key: string): Promise<T | null> {
+    const client = await this.poolService.getClient();
+    try {
+      const data = await client.get(key);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      throw error;
+    } finally {
+      this.poolService.releaseClient(client);
+    }
+  }
 
   async del(args: string | string[]): Promise<number> {
     const client = await this.poolService.getClient();

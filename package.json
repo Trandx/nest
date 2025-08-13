@@ -96,7 +96,8 @@
     ],
     "moduleNameMapper": {
       "^@package/test(|/.*)$": "<rootDir>/libs/test/src/$1",
-      "^@app/worker(|/.*)$": "<rootDir>/libs/worker/src/$1"
+      "^@app/worker(|/.*)$": "<rootDir>/libs/worker/src/$1",
+      "^@app/key-generator(|/.*)$": "<rootDir>/libs/key-generator/src/$1"
     }
   }
 }

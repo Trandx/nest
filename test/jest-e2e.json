@@ -12,6 +12,8 @@
   },
   "moduleNameMapper": {
     "@app/worker/(.*)": "<rootDir>/../libs/worker/src/$1",
-    "@app/worker": "<rootDir>/../libs/worker/src"
+    "@app/worker": "<rootDir>/../libs/worker/src",
+    "@app/key-generator/(.*)": "<rootDir>/../libs/key-generator/src/$1",
+    "@app/key-generator": "<rootDir>/../libs/key-generator/src"
   }
 }

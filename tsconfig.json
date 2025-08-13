@@ -53,11 +53,17 @@
       ],
       "@app/worker/*": [
         "libs/worker/src/*"
+      ],
+      "@app/key-generator": [
+        "libs/key-generator/src"
+      ],
+      "@app/key-generator/*": [
+        "libs/key-generator/src/*"
       ]
     },
     "incremental": true,
     "skipLibCheck": true,
-    "strict": false, // Active toutes les vérifications strictes
+    "strict": false,
     "strictNullChecks": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,

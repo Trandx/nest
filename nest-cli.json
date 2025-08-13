@@ -73,6 +73,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/worker/tsconfig.lib.json"
       }
+    },
+    "key-generator": {
+      "type": "library",
+      "root": "libs/key-generator",
+      "entryFile": "index",
+      "sourceRoot": "libs/key-generator/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/key-generator/tsconfig.lib.json"
+      }
     }
   }
 }

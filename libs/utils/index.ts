@@ -4,3 +4,4 @@ export * from './exceptions';
 export * from './env';
 export * from './interceptors';
 export * from './decorators';
+export * from './formater';
