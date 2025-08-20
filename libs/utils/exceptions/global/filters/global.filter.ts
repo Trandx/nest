@@ -5,18 +5,21 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import {
   QueryFailedError,
   EntityNotFoundError,
   CannotCreateEntityIdMapError,
 } from 'typeorm';
+import { Response } from 'express';
 import { errorResponse } from '../func';
 import { RedirectException } from '../../others';
-import { Response } from 'express';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(GlobalExceptionFilter.name);
+
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -33,20 +36,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // Handle RedirectException explicitly
     if (exception instanceof RedirectException) {
-      
       response.redirect(exception.getResponse() as string);
-
       return;
     }
 
+    // Ajustement du message selon le type d'erreur
     switch (exception.constructor) {
       case BadRequestException:
         statusCode = HttpStatus.BAD_REQUEST;
         if (Array.isArray(message)) {
           errors = message;
           message = 'Validation failed';
-        } else {
-          message = (exception as BadRequestException).message;
         }
         break;
 
@@ -65,15 +65,24 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         statusCode = HttpStatus.UNPROCESSABLE_ENTITY;
         message = (exception as CannotCreateEntityIdMapError).message || 'Cannot create EntityId map';
         break;
-
-      default:
-        if (!message) {
-          console.error(exception);
-        }
-        break;
     }
 
-    // Send the error response
+    // 📌 Logging JSON structuré
+    const errorData = {
+        timestamp: new Date().toISOString(),
+        method,
+        path,
+        statusCode,
+        message,
+        errors,
+        stack: exception?.stack,
+      }
+    this.logger.error(
+      errorData,
+      //JSON.stringify(errorData),
+    );
+
+    // 📌 Réponse HTTP
     response.status(statusCode).json(
       errorResponse(
         {

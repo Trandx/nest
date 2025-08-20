@@ -59,42 +59,54 @@ export class DatabaseService {
     await this.queryRunner.query(`SET search_path TO ${validated};`);
   }
 
-  async connect({schema = 'PUBLIC', serviceName}: { schema?: string; serviceName?: string } = {}) {
-    this.serviceName = serviceName;
-    
-    if (this.queryRunner && !this.queryRunner.isReleased) {
-      Logger.warn(`QueryRunner already active for: ${serviceName}`, this.className);
+  async connect({ schema = 'PUBLIC', serviceName }: { schema?: string; serviceName?: string } = {}) {
+    try {
+      this.serviceName = serviceName;
+
+      if (this.queryRunner && !this.queryRunner.isReleased) {
+        Logger.warn(`QueryRunner already active for: ${serviceName}`, this.className);
+        return this.queryRunner;
+      }
+
+      this.queryRunner = this.dataSource.createQueryRunner();
+      await this.queryRunner.connect();
+      await this.setSchema(schema);
+
+      Logger.log(`Connected to database with schema: ${schema} from service ${serviceName || 'default'}`, this.className);
+
       return this.queryRunner;
+    } catch (error) {
+      throw error
     }
-
-    this.queryRunner = this.dataSource.createQueryRunner();
-    await this.queryRunner.connect();
-    await this.setSchema(schema);
-    
-    Logger.log(`Connected to database with schema: ${schema} from service ${serviceName || 'default'}`, this.className);
-
-    return this.queryRunner;
   }
 
   async release(serviceName?: string) {
-    if (serviceName) {
-      this.serviceName = serviceName;
-    }
+    try {
+      if (serviceName) {
+        this.serviceName = serviceName;
+      }
 
-    if (this.queryRunner) {
-      await this.setSchema();
-      await this.queryRunner.release();
-      Logger.log(`Released query runner for service: ${this.serviceName || 'default'}`, this.className);
-    }
+      if (this.queryRunner) {
+        await this.setSchema();
+        await this.queryRunner.release();
+        Logger.log(`Released query runner for service: ${this.serviceName || 'default'}`, this.className);
+      }
 
-    this.serviceName = undefined;
+      this.serviceName = undefined;
+    } catch (error) {
+      throw error
+    }
   }
 
   async useRepository<T extends ObjectLiteral>(entity: EntityTarget<T>) {
-    if (!this.queryRunner) {
-      throw new Error('Database connection is not established. Call connect() first.');
+    try {
+      if (!this.queryRunner) {
+        throw new Error('Database connection is not established. Call connect() first.');
+      }
+      return this.queryRunner.manager.getRepository<T>(entity);
+    } catch (error) {
+      throw error
     }
-    return this.queryRunner.manager.getRepository<T>(entity);
   }
 
   async upsert<T extends ObjectLiteral>(
@@ -116,13 +128,17 @@ export class DatabaseService {
   }
 
   async update<T extends ObjectLiteral>({ entityClass, data, condition }: UpSertType<T>) {
-    const entityRepository = await this.useRepository(entityClass);
+    try {
+      const entityRepository = await this.useRepository(entityClass);
 
-    let result = await entityRepository.find({ where: condition });
+      let result = await entityRepository.find({ where: condition });
 
-    if (result.length === 0) return null;
+      if (result.length === 0) return null;
 
-    result = update<T>(result, data as T);
-    return entityRepository.save(result);
+      result = update<T>(result, data as T);
+      return entityRepository.save(result);
+    } catch (error) {
+      throw error
+    }
   }
 }

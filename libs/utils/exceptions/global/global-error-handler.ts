@@ -1,6 +1,11 @@
+/** old version
+ * this is anather way to handle exception globally
+ */
+
 import { NextFunction, Request, Response } from 'express';
 import { baseResponse, errorResponse } from './func'
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { trace } from 'node:console';
 type ErrorType = {
     statusCode: number,
     message: string
@@ -30,7 +35,10 @@ export const globalErrorHandler = (
   
     // Handle other errors
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(data);
+
+    throw err
   } catch (error) {
+    trace(error)
     next(error)
   }
 };

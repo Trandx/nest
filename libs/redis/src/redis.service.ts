@@ -6,82 +6,58 @@ import { Pool } from 'libs/utils';
 export class RedisService implements OnModuleDestroy {
   constructor(private readonly poolService: Pool<Redis>) {}
 
-  async getClient(): Promise<Redis> {
-    const client = await this.poolService.getClient();
-    return client;
-  }
-
-  async set(key: string, value: string, expireInSeconds?:  number | string): Promise<boolean> {
+  private async withClient<T>(fn: (client: Redis) => Promise<T>): Promise<T> {
     const client = await this.poolService.getClient();
     try {
+      return await fn(client);
+    } finally {
+      this.poolService.releaseClient(client);
+    }
+  }
+
+  async getClient(): Promise<Redis> {
+    return this.poolService.getClient();
+  }
+
+  async set(key: string, value: string, expireInSeconds?: number | string): Promise<boolean> {
+    return this.withClient(async (client) => {
       if (expireInSeconds) {
         await client.set(key, value, 'EX', expireInSeconds);
       } else {
         await client.set(key, value);
       }
-      return true
-    } catch (error) {
-      throw error;
-    } finally {
-      this.poolService.releaseClient(client);
-    }
+      return true;
+    });
   }
 
   async get(key: string): Promise<string | null> {
-    const client = await this.poolService.getClient();
-    try {
-      return await client.get(key);
-    } catch (error) {
-      throw error;
-    } finally {
-      this.poolService.releaseClient(client);
-    }
+    return this.withClient((client) => client.get(key));
   }
-  async getJson<T>(key: string): Promise<T | null> {
-    const client = await this.poolService.getClient();
-    try {
+
+  async getJson<T>(key: string): Promise<T> {
+    return this.withClient(async (client) => {
       const data = await client.get(key);
-      return data ? JSON.parse(data) : null;
-    } catch (error) {
-      throw error;
-    } finally {
-      this.poolService.releaseClient(client);
-    }
+      return data && JSON.parse(data);
+    });
+  }
+
+  async getAllJson<T>(pattern: string): Promise<T[]> {
+    return this.withClient(async (client) => {
+      const keys = await client.keys(pattern);
+      return await Promise.all(keys.map((key) => this.getJson<T>(key)));
+    });
   }
 
   async del(args: string | string[]): Promise<number> {
-    const client = await this.poolService.getClient();
-    try {
-      if (!Array.isArray(args)) {
-        args = [args]
-      }
-      return await client.del(args);
-    } catch (error) {
-      throw error;
-    } finally {
-     this.poolService.releaseClient(client);
-    }
+    return this.withClient((client) => client.del(Array.isArray(args) ? args : [args]));
   }
 
   async exists(key: string): Promise<number> {
-    const client = await this.poolService.getClient();
-    try {
-      return await client.exists(key);
-    } catch (error) {
-      throw error;
-    } finally {
-      this.poolService.releaseClient(client);
-    }
+    return this.withClient((client) => client.exists(key));
   }
+
   async ttl(key: string): Promise<number> {
-    const client = await this.poolService.getClient();
-    try {
-      return await client.ttl(key);
-    } catch (error) {
-      throw error;
-    } finally {
-      this.poolService.releaseClient(client);
-    }
+    return this.withClient((client) => client.ttl(key));
   }
 
   async onModuleDestroy() {
