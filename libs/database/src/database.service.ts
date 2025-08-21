@@ -80,6 +80,18 @@ export class DatabaseService {
     }
   }
 
+  public async withClient<T>({ schema = 'PUBLIC', serviceName }: { schema?: string; serviceName?: string } = {},fn: () => Promise<T> | T): Promise<T> {
+    await this.connect({ schema, serviceName });
+    try {
+      return await fn();
+    } catch (error) {
+      throw error;
+    } finally {
+      await this.release(serviceName);
+    }
+  }
+
+
   async release(serviceName?: string) {
     try {
       if (serviceName) {

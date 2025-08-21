@@ -10,8 +10,10 @@ export class RedisService implements OnModuleDestroy {
     const client = await this.poolService.getClient();
     try {
       return await fn(client);
+    }catch (error) {
+      throw error;
     } finally {
-      this.poolService.releaseClient(client);
+      await this.poolService.releaseClient(client);
     }
   }
 

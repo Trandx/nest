@@ -16,35 +16,34 @@ export class IsNotExistRule<T extends ObjectLiteral> {
 
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
 
-    await this.databaseService.connect({ serviceName:  this.className });
+    return await this.databaseService.withClient({ serviceName:  this.className }, async () =>{
 
-    try {
-      let [EntityClass, properties] = args.constraints as [EntityTarget<T>, PropertiesType<T>[], string];
+      try {
+        let [EntityClass, properties] = args.constraints as [EntityTarget<T>, PropertiesType<T>[], string];
 
-      let condition: FindOptionsWhere<T>[]
+        let condition: FindOptionsWhere<T>[]
 
-      if (!properties) {
-        properties = [ args.property as  (keyof T) ]
+        if (!properties) {
+          properties = [ args.property as  (keyof T) ]
+        }
+
+        condition = properties.map((field) => {
+          return { [field]: value } as FindOptionsWhere<T>;
+        });
+
+        //console.log(args.property, args);
+
+        const repository = await this.databaseService.useRepository<T>(EntityClass);
+        const isExist =  await repository.exists({ where: condition})
+
+        //console.log(isExist, properties);
+        
+        return !isExist; // Return true if no matching entity is found
+
+      } catch (error) {
+        throw error;
       }
-
-      condition = properties.map((field) => {
-        return { [field]: value } as FindOptionsWhere<T>;
-      });
-
-      //console.log(args.property, args);
-
-      const repository = await this.databaseService.useRepository<T>(EntityClass);
-      const isExist =  await repository.exists({ where: condition})
-
-      //console.log(isExist, properties);
-      
-      return !isExist; // Return true if no matching entity is found
-
-    } catch (error) {
-      throw error;
-    }finally {
-      await this.databaseService.release()
-    }
+    })
   }
 
   defaultMessage(args: ValidationArguments): string {
