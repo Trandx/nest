@@ -82,6 +82,24 @@
       "compilerOptions": {
         "tsConfigPath": "libs/key-generator/tsconfig.lib.json"
       }
+    },
+    "notification": {
+      "type": "library",
+      "root": "libs/notification",
+      "entryFile": "index",
+      "sourceRoot": "libs/notification/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/notification/tsconfig.lib.json"
+      }
+    },
+    "activiy-log": {
+      "type": "library",
+      "root": "libs/activiy-log",
+      "entryFile": "index",
+      "sourceRoot": "libs/activiy-log/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/activiy-log/tsconfig.lib.json"
+      }
     }
   }
 }

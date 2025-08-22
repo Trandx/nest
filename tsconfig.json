@@ -13,7 +13,8 @@
     "baseUrl": "./",
     "paths": {
       "@/*": [
-        "src/*"
+        "src/*",
+        "libs/*"
       ],
       "@app/utils/*": [
         "libs/utils/*"
@@ -59,6 +60,18 @@
       ],
       "@app/key-generator/*": [
         "libs/key-generator/src/*"
+      ],
+      "@app/notification": [
+        "libs/notification/src"
+      ],
+      "@app/notification/*": [
+        "libs/notification/src/*"
+      ],
+      "@app/activiy-log": [
+        "libs/activiy-log/src"
+      ],
+      "@app/activiy-log/*": [
+        "libs/activiy-log/src/*"
       ]
     },
     "incremental": true,

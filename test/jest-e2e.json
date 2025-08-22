@@ -14,6 +14,12 @@
     "@app/worker/(.*)": "<rootDir>/../libs/worker/src/$1",
     "@app/worker": "<rootDir>/../libs/worker/src",
     "@app/key-generator/(.*)": "<rootDir>/../libs/key-generator/src/$1",
-    "@app/key-generator": "<rootDir>/../libs/key-generator/src"
+    "@app/key-generator": "<rootDir>/../libs/key-generator/src",
+    "@app/audit/(.*)": "<rootDir>/../libs/audit/src/$1",
+    "@app/audit": "<rootDir>/../libs/audit/src",
+    "@app/notification/(.*)": "<rootDir>/../libs/notification/src/$1",
+    "@app/notification": "<rootDir>/../libs/notification/src",
+    "@app/activiy-log/(.*)": "<rootDir>/../libs/activiy-log/src/$1",
+    "@app/activiy-log": "<rootDir>/../libs/activiy-log/src"
   }
 }

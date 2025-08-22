@@ -15,3 +15,7 @@ export * from './redis/src'
 export * from './worker/src'
 
 export * from './key-generator/src'
+
+export * from './notification/src'
+
+export * from './activiy-log/src'
