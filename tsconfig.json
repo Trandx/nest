@@ -72,6 +72,12 @@
       ],
       "@app/activiy-log/*": [
         "libs/activiy-log/src/*"
+      ],
+      "@app/logger": [
+        "libs/logger/src"
+      ],
+      "@app/logger/*": [
+        "libs/logger/src/*"
       ]
     },
     "incremental": true,

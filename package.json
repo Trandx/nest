@@ -100,7 +100,8 @@
       "^@app/key-generator(|/.*)$": "<rootDir>/libs/key-generator/src/$1",
       "^@app/audit(|/.*)$": "<rootDir>/libs/audit/src/$1",
       "^@app/notification(|/.*)$": "<rootDir>/libs/notification/src/$1",
-      "^@app/activiy-log(|/.*)$": "<rootDir>/libs/activiy-log/src/$1"
+      "^@app/activiy-log(|/.*)$": "<rootDir>/libs/activiy-log/src/$1",
+      "^@app/logger(|/.*)$": "<rootDir>/libs/logger/src/$1"
     }
   }
 }

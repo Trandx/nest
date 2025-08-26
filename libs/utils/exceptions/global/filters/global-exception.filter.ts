@@ -21,9 +21,11 @@ import { EventService } from '@/utils/event';
 @Injectable()
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  constructor(private readonly eventService: EventService) {}
+  constructor(private readonly eventService: EventService) {
+    this.logger = new Logger(this.constructor.name);
+  }
 
-  private readonly logger = new Logger(GlobalExceptionFilter.name);
+  private readonly logger: Logger;
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();

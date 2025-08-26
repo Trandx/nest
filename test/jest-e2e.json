@@ -20,6 +20,8 @@
     "@app/notification/(.*)": "<rootDir>/../libs/notification/src/$1",
     "@app/notification": "<rootDir>/../libs/notification/src",
     "@app/activiy-log/(.*)": "<rootDir>/../libs/activiy-log/src/$1",
-    "@app/activiy-log": "<rootDir>/../libs/activiy-log/src"
+    "@app/activiy-log": "<rootDir>/../libs/activiy-log/src",
+    "@app/logger/(.*)": "<rootDir>/../libs/logger/src/$1",
+    "@app/logger": "<rootDir>/../libs/logger/src"
   }
 }

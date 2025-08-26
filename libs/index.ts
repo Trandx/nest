@@ -19,3 +19,5 @@ export * from './key-generator/src'
 export * from './notification/src'
 
 export * from './activiy-log/src'
+
+export * from './logger/src'
