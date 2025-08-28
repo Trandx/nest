@@ -1,8 +1,9 @@
 import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import { ActivityLogService } from './activiy-log.service';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { ActivityLogInterceptor, NOTIFICATION_EVENT_NAME } from './activiy-log.interceptor';
+import { ActivityLogInterceptor } from './activiy-log.interceptor';
 import { EventModule } from '@/utils/event';
+import { ACTIVITY_LOG_EVENT_NAME } from './const';
 
 export interface ActivityLogModuleOptions {
   globalInterceptor?: boolean;
@@ -13,12 +14,12 @@ export interface ActivityLogModuleOptions {
 @Module({})
 export class ActivityLogModule {
   static register(options: ActivityLogModuleOptions = {}): DynamicModule {
-    const { globalInterceptor = true, eventName = 'new.activity' } = options;
+    const { globalInterceptor = true, eventName: eventName = 'new.activity' } = options;
 
     const providers: Provider[] = [
       ActivityLogService,
       {
-        provide: NOTIFICATION_EVENT_NAME,
+        provide: ACTIVITY_LOG_EVENT_NAME,
         useValue: eventName,
       },
     ];

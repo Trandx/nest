@@ -30,11 +30,10 @@ export const globalErrorHandler = (
 
     if (err instanceof HttpException) {
       res.status(err.statusCode).json(data);
-      return;
+    } else {
+      // Handle other errors
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(data);
     }
-  
-    // Handle other errors
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(data);
 
     throw err
   } catch (error) {

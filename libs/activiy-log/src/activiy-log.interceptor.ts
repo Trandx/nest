@@ -4,13 +4,13 @@ import {
     ExecutionContext,
     Inject,
     Injectable,
-    Logger,
     NestInterceptor,
 } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
 import { ActivityLogService } from './activiy-log.service';
 import { Reflector } from '@nestjs/core';
 import { ACTION_KEY } from './decorator';
+import { ACTIVITY_LOG_EVENT_NAME } from './const';
 
 export type ActivityLog = {
     userId: string | number | null;
@@ -27,14 +27,12 @@ export type ActivityLog = {
     finishedAt: Date;
 }
 
-export const NOTIFICATION_EVENT_NAME = 'NOTIFICATION_EVENT_NAME'
-
 @Injectable()
 export class ActivityLogInterceptor implements NestInterceptor {
     constructor(
         private readonly reflector: Reflector,
-        private readonly auditService: ActivityLogService,
-        @Inject(NOTIFICATION_EVENT_NAME) private readonly eventName: string
+        private readonly activityLogService: ActivityLogService,
+        @Inject(ACTIVITY_LOG_EVENT_NAME) private readonly eventName: string
     ) { }
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -65,7 +63,7 @@ export class ActivityLogInterceptor implements NestInterceptor {
                         finishedAt: new Date(end),
                     }
 
-                    await this.auditService.sendAsync({
+                    await this.activityLogService.sendAsync({
                         eventName: this.eventName,
                         payload
                     });

@@ -5,6 +5,7 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   Logger,
 } from '@nestjs/common';
@@ -17,11 +18,15 @@ import { Response } from 'express';
 import { errorResponse } from '../func';
 import { RedirectException } from '../../others';
 import { EventService } from '@/utils/event';
+import { GLOBAL_EXCEPTION_EVENT_NAME } from './const';
 
 @Injectable()
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  constructor(private readonly eventService: EventService) {
+  constructor(
+    private readonly eventService: EventService,
+    @Inject(GLOBAL_EXCEPTION_EVENT_NAME) private readonly eventName: string
+  ) {
     this.logger = new Logger(this.constructor.name);
   }
 
@@ -89,9 +94,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       //JSON.stringify(errorData),
     );
 
-    // emit event exception.global
+    // emit event global.exception
     this.eventService.emitAsyncEvent({
-      eventName: 'exception.global',
+      eventName: this.eventName,
       payload: errorData,
     });
 
