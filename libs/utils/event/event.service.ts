@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EventType } from './interface';
+import { EventMap, EventType } from './interface';
 
 
 @Injectable()
@@ -13,8 +13,8 @@ export class EventService {
    * @param payload - The payload to send with the event.
    */
 
-  emitEvent({eventName, payload}: EventType) {
-    return this.eventEmitter.emit(eventName, payload);
+  emitEvent<T extends EventMap>({eventName, payload}: { eventName: keyof T; payload: T[keyof T] }) {
+    return this.eventEmitter.emit(eventName as string, payload);
   }
   /**
    * Emit an event asynchronously and return the results.
@@ -22,7 +22,7 @@ export class EventService {
    * @param payload - The payload to send with the event.
    */
 
-  async emitAsyncEvent({eventName, payload}: EventType) {
-    return await this.eventEmitter.emitAsync(eventName, payload);
+  async emitAsyncEvent<T extends EventMap>({eventName, payload}: { eventName: keyof T; payload: T[keyof T] }) {
+    return await this.eventEmitter.emitAsync(eventName as string, payload);
   }
 }

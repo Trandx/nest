@@ -1,14 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ChannelModel } from 'amqplib';
+import { Channel, ChannelModel } from 'amqplib';
 import * as zlib from 'node:zlib';
 import { Pool } from '../../../../utils';
 import { uid } from '../../../../utils';
 import { SendType } from './interface';
-
-// Extend Promise to add the `timeout` method
-interface ExecPromise extends Promise<string> {
-  timeout(ms: number): Promise<string>;
-}
 
 @Injectable()
 export class ClientRMQService {
@@ -34,76 +29,71 @@ export class ClientRMQService {
     }
   }
 
-  private async cleanupChannel(channel: any, connection: ChannelModel): Promise<void> {
+  private async cleanupChannel(channel: Channel, connection: ChannelModel): Promise<void> {
+    if (!channel) return;
     try {
-      await channel.close();
+      if (channel.close) {
+        await channel.close().catch(() => {}); // ignore already closed
+      }
+    } finally {
       this.poolService.releaseClient(connection);
-    } catch (error) {
-      console.error('Error cleaning up channel:', error);
     }
   }
 
-  private async sendInternal({ to: queueName = 'rpc_queue', message, timeout }: SendType): Promise<any> {
+  private async sendInternal({ to: queueName = 'rpc_queue', message, timeout }: SendType) {
     const connection = await this.poolService.getClient();
     const channel = await connection.createChannel();
 
     try {
       const replyQueue = await channel.assertQueue('', {
         exclusive: true,
-        durable: true,
+        durable: true,  // ✅ for RPC reply queues
         autoDelete: true
       });
 
       return new Promise((resolve, reject) => {
-        try {
-          const correlationId = uid();
-          const compressedMessage = this.zip(message);
+        const correlationId = uid();
+        const compressedMessage = this.zip(message);
 
-          setTimeout(async () => {
-            await this.cleanupChannel(channel, connection);
-            reject({
-              success: false,
-              error_type: 'timout',
-              message:
+        // setup timeout
+        const timer = setTimeout(async () => {
+          await this.cleanupChannel(channel, connection);
+          reject({
+            success: false,
+            error_type: 'timeout',
+            message:
               'RMQ response timeout: Data has been sent, but the remote server did not respond.'
-            });
-          }, timeout );
-
-          channel.sendToQueue(queueName, compressedMessage, {
-            replyTo: replyQueue.queue,
-            correlationId,
           });
+        }, timeout);
 
-          channel.consume(
-            replyQueue.queue,
-            async (msg) => {
-              try {
-                if (!msg) {
-                  reject(new Error('Empty message received'));
-                  return;
-                }
+        channel.sendToQueue(queueName, compressedMessage, {
+          replyTo: replyQueue.queue,
+          correlationId,
+        });
 
+        channel.consume(
+          replyQueue.queue,
+          async (msg) => {
+            if (!msg) return;
+
+            try {
+              if (msg.properties.correlationId === correlationId) {
+                clearTimeout(timer); // ✅ prevent timeout after response
                 const messageContent = this.unzip(msg.content);
                 const response = JSON.parse(messageContent);
-
-                if (msg.properties.correlationId === correlationId) {
-                  resolve(response);
-                }
-
-                channel.ack(msg);
-                await this.cleanupChannel(channel, connection);
-              } catch (error) {
-                console.error('Error processing response:', error);
-                msg && channel.nack(msg, false, false);
-                reject(error);
+                resolve(response);
               }
-            },
-            { noAck: false }
-          );
-        } catch (error) {
-          console.error('Error sending message:', error);
-          reject(error);
-        }
+              channel.ack(msg);
+            } catch (error) {
+              console.error('Error processing response:', error);
+              msg && channel.nack(msg, false, false);
+              reject(error);
+            } finally {
+              await this.cleanupChannel(channel, connection);
+            }
+          },
+          { noAck: false }
+        );
       });
     } catch (err) {
       console.error('Error in RPC client:', err);
@@ -112,25 +102,11 @@ export class ClientRMQService {
     }
   }
 
-  send({ to, message,  timeout = 15000 }: SendType): ExecPromise {
-    const promise: any = new Promise((resolve, reject) => {
-      
-      // setTimeout(() => {
-      //   resolve({
-      //     success: false,
-      //     error_type: 'timout',
-      //     message:
-      //     'RMQ response timeout: Data has been sent, but the remote server did not respond.'
-      //   });
-      // }, timeout );
-
+  send({ to, message, timeout = 15000 }: SendType) {
+    return new Promise((resolve, reject) => {
       this.sendInternal({ to, message, timeout })
         .then(data => resolve(data))
-        .catch(error => reject(error))
-    })
-
-    return promise;
+        .catch(error => reject(error));
+    });
   }
-
-  
 }

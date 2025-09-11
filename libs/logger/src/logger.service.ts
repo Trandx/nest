@@ -4,8 +4,13 @@ import { LoggerModuleOptions } from './logger.interfaces';
 
 @Injectable()
 export class LoggerService extends ConsoleLogger {
-  constructor(private readonly config: LoggerModuleOptions = {}) {
+  constructor() {
     super();
+  }
+  protected config: LoggerModuleOptions = {};
+
+  setConfig(config: LoggerModuleOptions) {
+    this.config = config;
   }
 
   /** Définit le contexte de cette instance */
@@ -23,7 +28,7 @@ export class LoggerService extends ConsoleLogger {
   }
 
   /** Formate le message avec contexte, correlationId et requestId */
-  private formatLogMessage({ level, message, context, userId}:{level: string, message: any, context?: string, userId?: string}) {
+  private formatLogMessage({ level, message, context, userId }: { level: string, message: any, context?: string, userId?: string }) {
     const { correlationId, requestId } = this.getIds();
     const finalContext = context || this.context;
 
@@ -50,42 +55,42 @@ export class LoggerService extends ConsoleLogger {
 
   log(message: any, context?: string) {
     if (context) {
-        super.log(this.formatLogMessage({ level: 'LOG', message, context}), context);
-        return;
+      super.log(this.formatLogMessage({ level: 'LOG', message, context }), context);
+      return;
     }
-    super.log(this.formatLogMessage({ level: 'LOG', message, context}));
+    super.log(this.formatLogMessage({ level: 'LOG', message, context }));
   }
 
   error(message: any, trace?: string, context?: string) {
-     if (context) {
-        super.error(this.formatLogMessage({ level: 'ERROR', message, context}), trace, context);
-        return;
+    if (context) {
+      super.error(this.formatLogMessage({ level: 'ERROR', message, context }), trace, context);
+      return;
     }
-    super.error(this.formatLogMessage({ level: 'ERROR', message, context}), trace);
+    super.error(this.formatLogMessage({ level: 'ERROR', message, context }), trace);
   }
 
   warn(message: any, context?: string) {
     if (context) {
-        super.warn(this.formatLogMessage({ level: 'WARN', message, context}), context);
-        return;
+      super.warn(this.formatLogMessage({ level: 'WARN', message, context }), context);
+      return;
     }
-    super.warn(this.formatLogMessage({ level: 'WARN', message, context}));
+    super.warn(this.formatLogMessage({ level: 'WARN', message, context }));
   }
 
   debug(message: any, context?: string) {
     if (context) {
-        super.debug(this.formatLogMessage({ level: 'DEBUG', message, context}), context);
-        return;
+      super.debug(this.formatLogMessage({ level: 'DEBUG', message, context }), context);
+      return;
     }
-    super.debug(this.formatLogMessage({ level: 'DEBUG', message, context}));
+    super.debug(this.formatLogMessage({ level: 'DEBUG', message, context }));
   }
 
   verbose(message: any, context?: string) {
-    
+
     if (context) {
-       super.verbose(this.formatLogMessage({ level: 'VERBOSE', message, context}), context);
-        return;
+      super.verbose(this.formatLogMessage({ level: 'VERBOSE', message, context }), context);
+      return;
     }
-    super.verbose(this.formatLogMessage({ level: 'VERBOSE', message, context}));
+    super.verbose(this.formatLogMessage({ level: 'VERBOSE', message, context }));
   }
 }

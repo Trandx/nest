@@ -13,8 +13,12 @@ export class LoggerModule implements NestModule {
       module: LoggerModule,
       providers: [
         {
-          provide: LoggerService,
-          useValue: new LoggerService({ format, includeUserId }),
+           provide: LoggerService,
+          useFactory: () => {
+            const logger = new LoggerService();
+            logger.setConfig({ format, includeUserId });
+            return logger;
+          }
         },
       ],
       exports: [LoggerService],

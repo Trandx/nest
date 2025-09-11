@@ -1,10 +1,12 @@
-import { EventService, EventType } from '@/utils/event';
+import { EventMap, EventService, EventType } from '@/utils/event';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ActivityLogService extends EventService {
 
-    send(data: EventType) {
+   send<T extends EventMap>(
+    data: { eventName: keyof T; payload: T[keyof T] }
+  ) {
         try {
             return this.emitEvent(data)
         } catch (error) {
@@ -12,7 +14,9 @@ export class ActivityLogService extends EventService {
         }
     }
 
-    async sendAsync(data: EventType) {
+   sendAsync<T extends EventMap>(
+    data: { eventName: keyof T; payload: T[keyof T] }
+  ) {
         try {
             return this.emitAsyncEvent(data)
         } catch (error) {
