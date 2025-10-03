@@ -1,4 +1,4 @@
-type RespnseAddType = {
+type ResponseAddType = {
     statusCode?: number;
     data?: any;
     method?: string;
@@ -6,16 +6,18 @@ type RespnseAddType = {
 }
 export type ResponseObjectType = {
     success: boolean;
+    title: string;
     message: string | null;
     errors: any;
-} & RespnseAddType
+} & ResponseAddType
 export const baseResponse:ResponseObjectType = {
     success: true,
+    title: '',
     message: '',
     errors: null
 }
 
-export const successResponse = ({ data = null, message = ''}, options:RespnseAddType = {} ) => {
+export const successResponse = ({ data = null, message = ''}, options:ResponseAddType = {} ) => {
     return {
         ...baseResponse,
         ...options,
@@ -24,13 +26,14 @@ export const successResponse = ({ data = null, message = ''}, options:RespnseAdd
     }
 }
 
-export const errorResponse = ( {errors = null, message = ''}, options:RespnseAddType = {} ) => {
+export const errorResponse = ( { title = '', errors = null, message = ''}, options:ResponseAddType = {} ) => {
     return {
         ...baseResponse,
         ...options,
         success: false,
         errors,
         message,
+        title,
     }
 }
 

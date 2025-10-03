@@ -79,6 +79,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         break;
     }
 
+    const exceptionName = exception?.constructor?.name as string;
+
+    const title = statusCode >= 500 ? 'Internal Server Error' : exceptionName.replace(/([a-z])([A-Z])/g, '$1 $2');
+
     // 📌 Logging JSON structuré
     const errorData = {
         timestamp: new Date().toISOString(),
@@ -86,6 +90,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         path,
         statusCode,
         message,
+        title,
         errors,
         stack: exception?.stack,
       }
@@ -103,15 +108,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     // 📌 Réponse HTTP
     response.status(statusCode).json(
       errorResponse(
-        {
-          message,
-          errors,
-        },
-        {
-          method,
-          path,
-          statusCode,
-        },
+      {
+        title,
+        message,
+        errors,
+      },
+      {
+        method,
+        path,
+        statusCode,
+      },
       ),
     );
   }

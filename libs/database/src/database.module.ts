@@ -2,6 +2,8 @@ import { DynamicModule, Global, Module } from '@nestjs/common';
 import { DatabaseService } from './database.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+import './typeorm-extensions';
+
 
 @Global()
 @Module({})
@@ -11,7 +13,7 @@ export class DatabaseModule {
       module: DatabaseModule,
       imports: [
         TypeOrmModule.forRootAsync({
-          useFactory: () => config, // <- Ceci retourne la config passée
+          useFactory: () => config,
         }),
       ],
       providers: [DatabaseService],

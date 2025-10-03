@@ -1,4 +1,4 @@
-export * from './rules.module';
+export * from './validator.module';
 export * from './is-exist.decorator';
 export * from './is-not-exist.decorator';
 export * from './with.decorator';

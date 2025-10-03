@@ -2,7 +2,6 @@ import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import { ActivityLogService } from './activiy-log.service';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ActivityLogInterceptor } from './activiy-log.interceptor';
-import { EventModule } from '@/utils/event';
 import { ACTIVITY_LOG_EVENT_NAME } from './const';
 
 export interface ActivityLogModuleOptions {
@@ -33,7 +32,7 @@ export class ActivityLogModule {
 
     return {
       module: ActivityLogModule,
-      imports: [EventModule],
+      imports: [],
       providers,
       exports: [ActivityLogService],
       global: true, // ✅ pour que le module soit global même en mode register()

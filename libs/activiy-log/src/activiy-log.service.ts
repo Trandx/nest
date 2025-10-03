@@ -1,4 +1,4 @@
-import { EventMap, EventService, EventType } from '@/utils/event';
+import { EventMap, EventService } from '@/utils/event';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

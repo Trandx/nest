@@ -7,4 +7,5 @@ export * from './recursive-null-value-to-empty.func';
 export * from './array-to-string.func';
 export * from './black-list-email.func';
 export * from './check-password-format.func';
-export * from './json-to-key-value.utils';
+export * from './json-to-key-value.func';
+export * from './generate-avatar-url.func';

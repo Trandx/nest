@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EventMap, EventType } from './interface';
+import { EventMap } from './interface';
 
 
 @Injectable()
 export class EventService {
-  constructor(protected readonly eventEmitter: EventEmitter2) {}
+  constructor(protected readonly eventEmitter: EventEmitter2) {
+    Logger.log('EventService initialized', this.eventEmitter);
+  }
   //protected readonly eventEmitter: EventEmitter
   /**
    * Emit an event with the given name and payload.

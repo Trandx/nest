@@ -2,12 +2,6 @@ import { registerDecorator, ValidationOptions } from 'class-validator';
 import { WithoutRule } from './rules';
 import { EntitySchema, ObjectType } from 'typeorm';
 
-// type WithoutContraintInterface<T> = [ObjectType<T> | EntitySchema<T> | string, {
-//     select: string,
-//     where: string,
-//     parameters: Record<string, string>
-// }];
-
 type WithoutContraintInterface<T> = ObjectType<T> | EntitySchema<T>;
 type fieldType<T> = keyof T;
 

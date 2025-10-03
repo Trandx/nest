@@ -18,6 +18,12 @@ export class DatabaseService {
     if (!this.dataSource.isInitialized) {
       throw new Error('DatabaseService: DataSource is not initialized.');
     }
+
+    if (this.dataSource) {
+      Logger.log('DatabaseService: DataSource is initialized.', this.className);
+    } else {
+      throw new Error('DatabaseService: Failed to initialize DataSource.');
+    }
   }
 
   private className: string;
