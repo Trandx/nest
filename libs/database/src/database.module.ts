@@ -4,7 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 import './typeorm-extensions';
 
-
 @Global()
 @Module({})
 export class DatabaseModule {

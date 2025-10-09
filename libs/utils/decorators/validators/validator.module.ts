@@ -1,22 +1,24 @@
-import { Global, Module } from '@nestjs/common';
-import { DatabaseModule } from '@app/database';
+import { DynamicModule, Global, Module, Type } from '@nestjs/common';
 import { IsExistRule, IsNotExistRule } from './rules';
+import { useContainer } from 'class-validator';
+import { ModuleRef } from '@nestjs/core';
 
-const validatorRules = [IsExistRule, IsNotExistRule];
+const rules = [IsExistRule, IsNotExistRule];
 
 @Global()
-@Module({
-      imports: [DatabaseModule], // <- on forward la config
-      providers: [...validatorRules],
-      exports: [...validatorRules],
-    })
+@Module({})
 export class ValidatorModule {
-  // static register(dbConfig: PostgresConnectionOptions): DynamicModule {
-  //   return {
-  //     module: ValidatorModule,
-  //     //imports: [DatabaseModule.register(dbConfig)], // <- on forward la config
-  //     providers: [...validatorRules],
-  //     exports: [...validatorRules],
-  //   };
-  // }
+  static forRoot(databaseModule: Type<any>): DynamicModule {
+    return {
+      module: ValidatorModule,
+      imports: [databaseModule],
+      providers: [...rules],
+      exports: [...rules],
+    };
+  }
+
+  constructor(private readonly moduleRef: ModuleRef) {
+    // Important : lie class-validator au conteneur Nest
+    useContainer(this.moduleRef, { fallbackOnErrors: true });
+  }
 }

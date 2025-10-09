@@ -29,6 +29,21 @@ export class DatabaseService {
   private className: string;
   private serviceName: string | undefined;
 
+  async onModuleInit() {
+    if (!this.dataSource.isInitialized) {
+      await this.dataSource.initialize();
+      console.log('✅ Database initialized');
+    }
+  }
+
+  get manager() {
+    return this.dataSource.manager;
+  }
+
+  get isInitialized(): boolean {
+    return this.dataSource.isInitialized;
+  }
+
   private async schemaExists(schema: string): Promise<boolean> {
     const result = await this.dataSource.query(
       `SELECT 1 FROM pg_namespace WHERE nspname = $1`,

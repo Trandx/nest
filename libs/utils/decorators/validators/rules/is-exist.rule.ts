@@ -5,48 +5,44 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface 
 } from 'class-validator';
-import { DatabaseService } from '../../../../database/src/database.service';
+import { DatabaseService } from '@app/database';
 
 type PropertiesType<T> = keyof T;
 
 @Injectable()
 @ValidatorConstraint({ name: 'IsExistRule', async: true })
 export class IsExistRule<T extends ObjectLiteral> implements ValidatorConstraintInterface {
+  private readonly className = this.constructor.name;
+  private readonly logger = new Logger(this.className);
 
-  constructor(private readonly  databaseService: DatabaseService) {}
-
-  private className = this.constructor.name;
+  constructor(private readonly databaseService: DatabaseService) {}
 
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
-
     if (!this.databaseService) {
       throw new Error('DatabaseService is not injected properly');
     }
 
     return await this.databaseService.withClient({ serviceName: this.className }, async () => {
       try {
-        let [EntityClass, properties] = args.constraints as [EntityTarget<T>, PropertiesType<T>[], string];
-        let condition: FindOptionsWhere<T>[];
+        let [EntityClass, properties] = args.constraints as [EntityTarget<T>, PropertiesType<T>[] | PropertiesType<T>];
 
-        if (!properties) {
-          properties = [args.property as (keyof T)];
+        if (!Array.isArray(properties)) {
+          properties = [properties];
         }
 
-        condition = properties.map((field) => {
-          return { [field]: value } as FindOptionsWhere<T>;
-        });
+        const condition = properties.map((field) => ({ [field]: value })) as FindOptionsWhere<T>[];
 
         const repository = await this.databaseService.useRepository<T>(EntityClass);
         const isExist = await repository.exists({ where: condition });
         return isExist;
       } catch (error) {
-        Logger.error('Validation error:', error.stack, 'IsExistRule');
+        this.logger.error('Validation error', error.stack);
         throw error;
       }
     });
   }
 
   defaultMessage(args: ValidationArguments): string {
-    return `${args.property} ${args.value} does not exist.`;
+    return `The ${args.property} (${args.value}) does not exist.`;
   }
 }

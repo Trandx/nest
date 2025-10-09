@@ -5,9 +5,7 @@ import { EventMap } from './interface';
 
 @Injectable()
 export class EventService {
-  constructor(protected readonly eventEmitter: EventEmitter2) {
-    Logger.log('EventService initialized', this.eventEmitter);
-  }
+  constructor(protected readonly eventEmitter: EventEmitter2) {}
   //protected readonly eventEmitter: EventEmitter
   /**
    * Emit an event with the given name and payload.

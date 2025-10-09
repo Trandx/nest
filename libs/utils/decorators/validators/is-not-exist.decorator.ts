@@ -7,7 +7,7 @@ type PropertiesType<T> = keyof T;
 
 type UniqueType<T> = {
   entity: UniqueContraintInterface<T>;
-  properties?: PropertiesType<T>[];
+  properties?: PropertiesType<T> | PropertiesType<T>[];
   validationOptions?: ValidationOptions;
 };
 
