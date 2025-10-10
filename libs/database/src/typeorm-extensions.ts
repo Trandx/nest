@@ -1,6 +1,7 @@
-import { FindOptionsWhere } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere } from 'typeorm';
 import { DeepPartial, EntityTarget, ObjectLiteral, Repository } from 'typeorm';
 import { update } from '@app/utils/function';
+import { Brackets } from 'typeorm';
 
 type Operator = "=" | "!=" | "<" | "<=" | ">" | ">=" | "LIKE" | "ILIKE" | "IN";
 
@@ -12,8 +13,39 @@ export type UpSertType<T> = {
   data: DeepPartial<T>;
 };
 
+type BaseSerachOptions<T> = {
+  keyword: string;
+  condition?: ConditionOptions<T>;
+  limit?: number;
+  offset?: number;
+}
+
+/**
+ * Full text search using PostgreSQL's full-text search capabilities.
+ * Supports both vector-based search and like-based search.
+ */
+
+export type VectorSearchOptions<Entity> = ({
+  searchVector: keyof Entity;
+  order?: "ASC" | "DESC";
+  language?: string;
+} | {
+  columns: (keyof Entity)[];
+  order?: "ASC" | "DESC";
+  language?: string;
+}) & BaseSerachOptions<Entity>
+
+export type SimpleSearchOptions<Entity> = {
+  columns: (keyof Entity)[];
+  order?: FindOptionsOrder<Entity>;
+} & BaseSerachOptions<Entity>
+
+export type SearchOptions<Entity> = SimpleSearchOptions<Entity> | VectorSearchOptions<Entity>;
+
 declare module "typeorm" {
   interface Repository<Entity> {
+    simpleSearch(options: SimpleSearchOptions<Entity>): Promise<[Entity[], number]>;
+    deepSearch(options: SearchOptions<Entity>): Promise<[Entity[], number]>;
     whereAny(
       fields: string[],
       value: any | any[],
@@ -46,13 +78,117 @@ function buildCondition(
   }
   return `${alias}.${field} ${operator} :${paramName}`;
 }
-Repository.prototype.whereAny = async function<Entity extends ObjectLiteral> (
+
+Repository.prototype.simpleSearch = async function <Entity extends ObjectLiteral>(
+  options: SimpleSearchOptions<Entity>
+){
+  const repository = this as Repository<Entity>;
+  const alias = repository.metadata.name.toLowerCase();
+  const qb = repository.createQueryBuilder(alias);
+
+  const { limit, offset, keyword, condition, columns } = options;
+
+  if (!columns || columns.length === 0) {
+    throw new Error(`Repository ${repository.metadata.name}: columns[] is required for simpleSearch().`);
+  }
+
+  // 🧩 Helper to build LIKE query block
+  const buildLikeBrackets = () =>
+    new Brackets(qbExp => {
+      columns.forEach((col, index) => {
+        const clause = `${alias}."${String(col)}" ILIKE :kw`;
+        if (index === 0) qbExp.where(clause, { kw: `%${keyword}%` });
+        else qbExp.orWhere(clause, { kw: `%${keyword}%` });
+      });
+    });
+
+  // 🧠 No keyword → return condition only
+  if (!keyword || keyword.trim() === '') {
+    if (condition) qb.where(condition);
+    if (limit) qb.take(limit);
+    if (offset) qb.skip(offset);
+    return qb.getManyAndCount();
+  }
+
+  // ⚙️ Apply condition + keyword in grouped brackets
+  if (condition) {
+    qb.where(condition).andWhere(buildLikeBrackets());
+  } else {
+    qb.where(buildLikeBrackets());
+  }
+
+  if (limit) qb.take(limit);
+  if (offset) qb.skip(offset);
+
+  return qb.getManyAndCount();
+};
+
+Repository.prototype.deepSearch = async function <Entity extends ObjectLiteral>(
+  options: VectorSearchOptions<Entity>
+) {
+  const repository = this as Repository<Entity>;
+  const alias = repository.metadata.name.toLowerCase();
+  const qb = repository.createQueryBuilder(alias);
+
+  const {
+    limit,
+    offset,
+    keyword,
+    order = 'DESC',
+    language = 'simple',
+    condition,
+  } = options;
+
+  if (!keyword || keyword.trim() === '') {
+    if (condition) qb.where(condition);
+    if (limit) qb.take(limit);
+    if (offset) qb.skip(offset);
+    return qb.getManyAndCount();
+  }
+
+  // 🧩 Helper to build the search block
+  const buildSearchBrackets = () =>
+    new Brackets(qbExp => {
+      if ('searchVector' in options && repository.metadata.columns.some(c => c.databaseName === String(options.searchVector))) {
+        const col = String(options.searchVector);
+        qbExp.where(`${alias}."${col}" @@ plainto_tsquery(:lang, :kw)`, { lang: language, kw: keyword });
+        qb.addSelect(`ts_rank(${alias}."${col}", plainto_tsquery(:lang, :kw))`, 'rank');
+      } else if ('columns' in options && options.columns.length > 0) {
+        const { columns } = options;
+        const joinedCols = columns.map(col => `coalesce(${alias}."${String(col)}", '')`).join(" || ' ' || ");
+        qbExp.where(`to_tsvector(:lang, ${joinedCols}) @@ plainto_tsquery(:lang, :kw)`, { lang: language, kw: keyword });
+        qb.addSelect(`ts_rank(to_tsvector(:lang, ${joinedCols}), plainto_tsquery(:lang, :kw))`, 'rank');
+      } else {
+        throw new Error(
+          `Repository ${repository.metadata.name}: No searchVector column or columns[] provided for deepSearch().`
+        );
+      }
+    });
+
+  // ⚙️ Apply condition + search
+  if (condition) {
+    qb.where(condition).andWhere(buildSearchBrackets());
+  } else {
+    qb.where(buildSearchBrackets());
+  }
+
+  // Apply rank ordering
+  qb.orderBy('rank', order);
+
+  if (limit) qb.take(limit);
+  if (offset) qb.skip(offset);
+
+  return qb.getManyAndCount();
+};
+
+
+Repository.prototype.whereAny = async function <Entity extends ObjectLiteral>(
   fields: string[],
   value: any | any[],
   operator: Operator = "="
 ): Promise<Entity[]> {
-    const repository = (this as Repository<Entity>)
-    const alias = repository.metadata.name.toLowerCase();
+  const repository = (this as Repository<Entity>)
+  const alias = repository.metadata.name.toLowerCase();
   const qb = repository.createQueryBuilder(alias);
 
   if (Array.isArray(value) && operator === "=") operator = "IN";
@@ -70,13 +206,13 @@ Repository.prototype.whereAny = async function<Entity extends ObjectLiteral> (
   return qb.getMany();
 };
 
-Repository.prototype.whereAll = async function<Entity extends ObjectLiteral> (
+Repository.prototype.whereAll = async function <Entity extends ObjectLiteral>(
   fields: string[],
   value: any | any[],
   operator: Operator = "="
 ): Promise<Entity[]> {
-    const repository = (this as Repository<Entity>)
-    const alias = repository.metadata.name.toLowerCase();
+  const repository = (this as Repository<Entity>)
+  const alias = repository.metadata.name.toLowerCase();
   const qb = repository.createQueryBuilder(alias);
 
   if (Array.isArray(value) && operator === "=") operator = "IN";
@@ -94,7 +230,7 @@ Repository.prototype.whereAll = async function<Entity extends ObjectLiteral> (
   return qb.getMany();
 };
 
-Repository.prototype.customUpsert = async function<T extends ObjectLiteral>(
+Repository.prototype.customUpsert = async function <T extends ObjectLiteral>(
   { data, condition }: UpSertType<T>
 ) {
   try {
@@ -112,7 +248,7 @@ Repository.prototype.customUpsert = async function<T extends ObjectLiteral>(
   }
 };
 
-Repository.prototype.customUpdate = async function<T extends ObjectLiteral>(
+Repository.prototype.customUpdate = async function <T extends ObjectLiteral>(
   { data, condition }: UpSertType<T>
 ) {
   try {

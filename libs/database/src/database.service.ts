@@ -1,14 +1,8 @@
 import { update } from '@app/utils/function';
 import { Injectable, Logger } from '@nestjs/common';
-import { DataSource, DeepPartial, EntityTarget, FindOptionsWhere, ObjectLiteral, QueryRunner } from 'typeorm';
+import { DataSource, DeepPartial, EntityTarget, ObjectLiteral, QueryRunner } from 'typeorm';
+import { UpSertType } from './typeorm-extensions';
 
-export type ConditionOptions<T> = FindOptionsWhere<T> | FindOptionsWhere<T>[];
-
-export type UpSertType<T> = {
-  entityClass: EntityTarget<T>;
-  condition: ConditionOptions<T>;
-  data: DeepPartial<T>;
-};
 
 @Injectable()
 export class DatabaseService {
