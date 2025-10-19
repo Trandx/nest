@@ -22,7 +22,7 @@ export class IsExistRule<T extends ObjectLiteral> implements ValidatorConstraint
       throw new Error('DatabaseService is not injected properly');
     }
 
-    return await this.databaseService.withClient({ serviceName: this.className }, async () => {
+    return await this.databaseService.getClient({ serviceName: this.className }, async (entityManager) => {
       try {
         let [EntityClass, properties] = args.constraints as [EntityTarget<T>, PropertiesType<T>[] | PropertiesType<T>];
 
@@ -32,7 +32,7 @@ export class IsExistRule<T extends ObjectLiteral> implements ValidatorConstraint
 
         const condition = properties.map((field) => ({ [field]: value })) as FindOptionsWhere<T>[];
 
-        const repository = await this.databaseService.useRepository<T>(EntityClass);
+        const repository = entityManager.getRepository<T>(EntityClass);
         const isExist = await repository.exists({ where: condition });
         return isExist;
       } catch (error) {

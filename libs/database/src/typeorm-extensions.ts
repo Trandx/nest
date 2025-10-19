@@ -1,5 +1,5 @@
 import { FindOptionsOrder, FindOptionsWhere } from 'typeorm';
-import { DeepPartial, EntityTarget, ObjectLiteral, Repository } from 'typeorm';
+import { DeepPartial, ObjectLiteral, Repository } from 'typeorm';
 import { update } from '@app/utils/function';
 import { Brackets } from 'typeorm';
 
@@ -8,7 +8,6 @@ type Operator = "=" | "!=" | "<" | "<=" | ">" | ">=" | "LIKE" | "ILIKE" | "IN";
 export type ConditionOptions<T> = FindOptionsWhere<T> | FindOptionsWhere<T>[];
 
 export type UpSertType<T> = {
-  entityClass: EntityTarget<T>;
   condition: ConditionOptions<T>;
   data: DeepPartial<T>;
 };
