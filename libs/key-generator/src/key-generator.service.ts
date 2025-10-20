@@ -6,7 +6,7 @@ export interface KeyPair {
   kid: string;
   publicKey: string;
   privateKey: string;
-  createdAt: Date;
+  createdAt: number;
   expires: number; // Optional, can be used for convenience
 }
 
@@ -22,7 +22,7 @@ export class KeyGeneratorService {
      * @returns KeyPair object containing the generated keys and metadata.
      * @throws Error if expiresIn is less than or equal to 0.
      */
-    async genarateKey(expiresIn: number = 24 * 60 * 60): Promise<KeyPair> {
+    async genarateKey(expiresIn: number ): Promise<KeyPair> {
         try {
             if (expiresIn <= 0) {
                 throw new Error('Expiration time must be greater than 0');
@@ -39,7 +39,7 @@ export class KeyGeneratorService {
                 kid,
                 publicKey: publicKey.export({ type: 'spki', format: 'pem' }).toString(),
                 privateKey: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
-                createdAt: new Date(),
+                createdAt: Date.now(),
                 expires,// in milliseconds
             } as KeyPair;
 
