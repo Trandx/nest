@@ -33,33 +33,33 @@ export class DatabaseService extends LoggerService {
   }
 
   private async validateSchemaName(schema: string): Promise<string> {
-    const schemaUpper = schema.trim().toUpperCase();
+    schema = schema.trim();
 
-    if (!schemaUpper || schemaUpper.length > this.MAX_SCHEMA_LENGTH) {
+    if (!schema || schema.length > this.MAX_SCHEMA_LENGTH) {
       throw new Error(`Invalid schema name length: "${schema}"`);
     }
 
-    if (!this.SCHEMA_PATTERN.test(schemaUpper)) {
+    if (!this.SCHEMA_PATTERN.test(schema)) {
       throw new Error(`Invalid schema name format: "${schema}"`);
     }
 
     const [result] = await this.dataSource.query(
       'SELECT 1 FROM pg_namespace WHERE nspname = $1',
-      [schemaUpper]
+      [schema]
     );
 
     if (!result) {
       throw new Error(`Schema "${schema}" does not exist`);
     }
 
-    return schemaUpper;
+    return schema;
   }
 
   private async setSchema(queryRunner: QueryRunner, schema: string): Promise<void> {
     if (schema.toUpperCase() === 'PUBLIC') return;
     
-    const validated = await this.validateSchemaName(schema);
-    await queryRunner.query(`SET search_path TO ${validated}`);
+    const schemaValidated = await this.validateSchemaName(schema);
+    await queryRunner.query(`SET search_path TO ${schemaValidated}`);
   }
 
   private async cleanupQueryRunner(queryRunner: QueryRunner, serviceName?: string): Promise<void> {
